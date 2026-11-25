@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LIFELINE 112 — Universal Incident Panic Response System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --navy-950: #060b16;
+    --navy-900: #0a1224;
+    --navy-800: #111c36;
+    --navy-700: #1c2c4f;
+    --slate-900: #0f172a;
+    --slate-700: #334155;
+    --slate-500: #64748b;
+    --slate-300: #cbd5e1;
+    --slate-200: #e2e8f0;
+    --slate-100: #f1f5f9;
+    --white: #ffffff;
+    --red-600: #dc2626;
+    --red-700: #b91c1c;
+    --red-500: #ef4444;
+    --orange-600: #ea580c;
+    --amber-600: #d97706;
+    --green-600: #16a34a;
+    --blue-600: #2563eb;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--navy-950); color: var(--white); line-height: 1.5;
+  }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+  button, input, select, textarea { font-family: inherit; }
+
+  /* TOP AWS ENDPOINT BAR (SAMRAKSHA STYLE) */
+  .aws-top-bar {
+    background: linear-gradient(90deg, #091326 0%, #132347 50%, #091326 100%);
+    border-bottom: 1px solid rgba(56, 189, 248, 0.35);
+    padding: 8px 18px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; flex-wrap: wrap;
+    position: sticky; top: 0; z-index: 90;
+  }
+  .aws-top-bar-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .aws-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 3px 10px; border-radius: 999px;
+    font-size: 0.72rem; font-weight: 800; letter-spacing: 0.04em;
+    background: rgba(16, 185, 129, 0.15); color: #6ee7b7;
+    border: 1px solid rgba(16, 185, 129, 0.4);
+  }
+  .aws-pill.offline {
+    background: rgba(245, 158, 11, 0.15); color: #fcd34d;
+    border-color: rgba(245, 158, 11, 0.4);
+  }
+  .aws-endpoint-input {
+    background: #060b16; color: #e2e8f0;
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    border-radius: 6px; padding: 5px 10px;
+    font-size: 0.78rem; width: 350px; max-width: 100%;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .aws-endpoint-input:focus { outline: none; border-color: #38bdf8; }
+
+  .prototype-banner {
+    background: linear-gradient(90deg, #7f1d1d 0%, #991b1b 50%, #7f1d1d 100%);
+    color: #fef2f2; padding: 6px 16px; font-size: 0.78rem; font-weight: 600; text-align: center;
+  }
+
+  .container { max-width: 1240px; margin: 0 auto; padding: 0 20px; }
+  .card {
+    background: var(--white); color: var(--slate-900);
+    border-radius: 12px; padding: 20px;
+    box-shadow: 0 10px 28px rgba(6, 11, 22, 0.18);
+    border: 1px solid var(--slate-200);
+  }
+  .card-dark {
+    background: var(--navy-800); color: var(--white);
+    border-radius: 12px; padding: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+  .flex-between { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .flex-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+    padding: 9px 15px; border-radius: 8px; border: 1px solid transparent;
+    font-weight: 600; font-size: 0.88rem; cursor: pointer;
+    transition: transform 0.12s ease, background-color 0.16s ease;
+    text-decoration: none; white-space: nowrap;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn-sm { padding: 5px 10px; font-size: 0.78rem; }
+  .btn-lg { padding: 13px 22px; font-size: 0.98rem; }
+  .btn-red { background: var(--red-600); color: #fff; box-shadow: 0 6px 18px rgba(220, 38, 38, 0.35); }
+  .btn-red:hover { background: var(--red-700); }
+  .btn-orange { background: var(--orange-600); color: #fff; }
+  .btn-green { background: var(--green-600); color: #fff; }
+  .btn-sky { background: #0284c7; color: #fff; }
+  .btn-navy { background: var(--navy-800); color: #fff; border-color: rgba(255,255,255,0.16); }
+  .btn-outline { background: transparent; color: #fff; border-color: rgba(255,255,255,0.25); }
+  .btn-outline-dark { background: #fff; color: var(--slate-900); border-color: var(--slate-300); }
+
+  /* Forms */
+  .form-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
+  .form-label { font-size: 0.82rem; font-weight: 600; color: var(--slate-700); }
+  .form-input, .form-select, .form-textarea {
+    width: 100%; padding: 9px 12px; border-radius: 8px;
+    border: 1px solid var(--slate-300); background: #fff; color: var(--slate-900); font-size: 0.9rem;
+  }
+  .form-textarea { min-height: 82px; resize: vertical; }
+
+  /* Badges */
+  .badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 9px; border-radius: 999px;
+    font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em;
+  }
+  .sev-critical { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+  .sev-high { background: #ffedd5; color: #c2410c; border: 1px solid #fed7aa; }
+  .sev-medium { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+  .sev-low { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+  .status-active { background: #dbeafe; color: #1d4ed8; }
+  .status-ack { background: #fef3c7; color: #b45309; }
+  .status-resolved { background: #dcfce7; color: #15803d; }
+  .badge-sim { background: #ede9fe; color: #6d28d9; border: 1px dashed #a78bfa; }
+  .badge-act { background: #fef2f2; color: #991b1b; border: 1px solid #fca5a5; }
+
+  /* Navbar */
+  .navbar {
+    background: rgba(10, 18, 36, 0.95);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    padding: 12px 20px;
+  }
+  .logo-box { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; }
+  .logo-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: linear-gradient(135deg, #ef4444, #b91c1c);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 900; font-size: 1.1rem; box-shadow: 0 4px 14px rgba(220,38,38,0.45);
+  }
+
+  /* Hero & SOS Button */
+  .hero {
+    background: radial-gradient(circle at 80% 20%, rgba(220, 38, 38, 0.22), transparent 45%), var(--navy-900);
+    padding: 44px 0 54px; border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .hero-grid { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 32px; align-items: center; }
+  .hero-title { font-size: clamp(2rem, 4vw, 3.1rem); font-weight: 900; line-height: 1.08; margin: 12px 0 14px; }
+
+  .sos-ring { position: relative; display: inline-flex; align-items: center; justify-content: center; }
+  .sos-ring::before, .sos-ring::after {
+    content: ''; position: absolute; inset: -14px; border-radius: 999px;
+    border: 2px solid rgba(239, 68, 68, 0.55);
+    animation: pulseRing 2s ease-out infinite; pointer-events: none;
+  }
+  .sos-ring::after { animation-delay: 1s; }
+  @keyframes pulseRing {
+    0% { transform: scale(0.92); opacity: 0.9; }
+    100% { transform: scale(1.26); opacity: 0; }
+  }
+  .sos-btn {
+    position: relative; z-index: 2; width: 220px; height: 220px; border-radius: 999px;
+    border: 6px solid rgba(254, 202, 202, 0.5);
+    background: radial-gradient(circle at 30% 25%, #ef4444, #dc2626 60%, #991b1b 100%);
+    color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 18px; cursor: pointer;
+    box-shadow: 0 0 0 10px rgba(220, 38, 38, 0.2), 0 22px 45px rgba(220, 38, 38, 0.45);
+    transition: transform 0.15s ease;
+  }
+  .sos-btn:hover { transform: scale(1.04); }
+
+  /* Sound Wave */
+  .sound-wave { display: inline-flex; align-items: center; gap: 4px; height: 24px; }
+  .sound-wave span {
+    width: 4px; height: 7px; border-radius: 4px; background: #fecaca;
+    animation: wave 0.7s ease-in-out infinite;
+  }
+  .sound-wave span:nth-child(2) { animation-delay: 0.12s; }
+  .sound-wave span:nth-child(3) { animation-delay: 0.24s; }
+  .sound-wave span:nth-child(4) { animation-delay: 0.36s; }
+  .sound-wave span:nth-child(5) { animation-delay: 0.18s; }
+  .sound-wave.paused span { animation: none; opacity: 0.4; }
+  @keyframes wave { 0%, 100% { height: 6px; } 50% { height: 22px; } }
+
+  /* Dashboard Layout */
+  .dash-tabs {
+    display: flex; gap: 8px; flex-wrap: wrap;
+    background: var(--navy-900); padding: 12px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .tab-btn {
+    padding: 8px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.12);
+    background: transparent; color: var(--slate-300); font-weight: 600; font-size: 0.85rem; cursor: pointer;
+  }
+  .tab-btn.active { background: var(--red-600); color: #fff; border-color: var(--red-500); }
+
+  .kpi-card {
+    background: #fff; color: var(--slate-900); border-radius: 12px; padding: 16px;
+    border-left: 4px solid var(--navy-700);
+  }
+  .kpi-red { border-left-color: var(--red-600); }
+  .kpi-orange { border-left-color: var(--orange-600); }
+  .kpi-amber { border-left-color: var(--amber-600); }
+  .kpi-green { border-left-color: var(--green-600); }
+  .kpi-blue { border-left-color: var(--blue-600); }
+  .kpi-label { font-size: 0.74rem; font-weight: 700; text-transform: uppercase; color: var(--slate-500); }
+  .kpi-val { font-size: 1.75rem; font-weight: 800; margin-top: 4px; }
+
+  /* Tables */
+  .table-wrap { width: 100%; overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+  th {
+    text-align: left; padding: 10px 12px; background: var(--slate-100);
+    color: var(--slate-700); font-size: 0.74rem; text-transform: uppercase; border-bottom: 1px solid var(--slate-200);
+  }
+  td { padding: 11px 12px; border-bottom: 1px solid var(--slate-200); vertical-align: top; }
+
+  /* Modals & Full-Screen Emergency Overlay */
+  .modal-backdrop {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(6, 11, 22, 0.78); backdrop-filter: blur(4px);
+    display: none; align-items: center; justify-content: center; padding: 16px; overflow-y: auto;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal-box {
+    background: #fff; color: var(--slate-900); border-radius: 16px;
+    width: 100%; max-width: 620px; max-height: 90vh; overflow-y: auto; padding: 24px;
+  }
+  .emergency-overlay {
+    position: fixed; inset: 0; z-index: 500;
+    background: rgba(127, 29, 29, 0.96);
+    display: none; align-items: center; justify-content: center; padding: 20px; overflow-y: auto;
+  }
+  .emergency-overlay.open { display: flex; }
+  .emergency-card {
+    background: var(--navy-950); color: #fff; border: 2px solid #f87171;
+    border-radius: 16px; max-width: 640px; width: 100%; padding: 26px;
+  }
+
+  /* Notification Dropdown & Toasts */
+  .notif-wrap { position: relative; }
+  .notif-panel {
+    position: absolute; right: 0; top: calc(100% + 8px); width: 340px; max-width: 90vw;
+    background: #fff; color: var(--slate-900); border-radius: 12px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.4); border: 1px solid var(--slate-200);
+    display: none; z-index: 150; overflow: hidden;
+  }
+  .notif-panel.open { display: block; }
+  .toast-stack { position: fixed; bottom: 18px; right: 18px; z-index: 600; display: flex; flex-direction: column; gap: 8px; max-width: 340px; }
+  .toast {
+    background: var(--navy-800); color: #fff; border-left: 4px solid #38bdf8;
+    padding: 11px 14px; border-radius: 8px; font-size: 0.84rem; box-shadow: 0 10px 28px rgba(0,0,0,0.45);
+  }
+  .toast.crit { border-left-color: #ef4444; background: #450a0a; }
+
+  .hidden { display: none !important; }
+  @media (max-width: 900px) {
+    .hero-grid, .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+    .aws-endpoint-input { width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- TOP AWS API GATEWAY ENDPOINT BAR (SAMRAKSHA STYLE) -->
+  <div class="aws-top-bar">
+    <div class="aws-top-bar-left">
+      <span id="awsStatusPill" class="aws-pill offline">● LOCAL STORAGE MODE</span>
+      <label for="awsEndpointInput" style="font-size:0.76rem;font-weight:700;color:#93c5fd;">AWS API Gateway URL:</label>
+      <input
+        id="awsEndpointInput"
+        class="aws-endpoint-input"
+        type="url"
+        placeholder="https://xxxxxxxxxx.execute-api.ap-south-1.amazonaws.com"
+      />
+      <button class="btn btn-sky btn-sm" onclick="saveAwsEndpoint()">Connect & Sync</button>
+      <button class="btn btn-outline btn-sm" onclick="clearAwsEndpoint()">Disconnect</button>
+    </div>
+    <div style="font-size:0.74rem;color:#94a3b8;">
+      DynamoDB + Lambda + API Gateway Ready (0 Credits Idle)
+    </div>
+  </div>
+
+  <div class="prototype-banner">
+    LIFELINE 112 — Universal Incident Panic Response System • Does NOT auto-dial real emergency services. In a real emergency, dial 112.
+  </div>
+
+  <!-- MAIN NAVIGATION BAR -->
+  <header class="navbar">
+    <div class="container flex-between">
+      <div class="logo-box" onclick="switchView('landing')">
+        <div class="logo-icon">112</div>
+        <div>
+          <div style="font-weight:900;font-size:1.18rem;line-height:1.1;">LIFELINE <span style="color:#f87171;">112</span></div>
+          <div style="font-size:0.68rem;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;">Universal Panic Response</div>
+        </div>
+      </div>
+
+      <div class="flex-row">
+        <button class="btn btn-navy btn-sm" onclick="testSiren()">🔊 Test Siren</button>
+        <div class="notif-wrap">
+          <button class="btn btn-navy btn-sm" onclick="toggleNotifPanel()">
+            🔔 Alerts (<span id="unreadBadge">0</span>)
+          </button>
+          <div id="notifPanel" class="notif-panel">
+            <div class="flex-between" style="padding:10px 12px;background:#f8fafc;border-bottom:1px solid #e2e8f0;">
+              <strong style="font-size:0.85rem;">Live Notifications <span class="badge badge-sim">DEMO</span></strong>
+              <button class="btn btn-outline-dark btn-sm" onclick="markAllNotifsRead()">Mark Read</button>
+            </div>
+            <div id="notifList" style="max-height:300px;overflow-y:auto;"></div>
+          </div>
+        </div>
+        <button id="navAuthBtn" class="btn btn-outline btn-sm" onclick="openAuthModal()">Login / Demo Roles</button>
+        <button id="navDashBtn" class="btn btn-red btn-sm hidden" onclick="switchView('dashboard')">Open Dashboard</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- VIEW 1: LANDING PAGE -->
+  <main id="landingView">
+    <section class="hero">
+      <div class="container hero-grid">
+        <div>
+          <span class="badge sev-critical">PUBLIC EMERGENCY & INCIDENT COORDINATION</span>
+          <h1 class="hero-title">One Tap. One Alert. <span style="color:#ef4444;">Faster Emergency Response.</span></h1>
+          <p style="color:#cbd5e1;font-size:1.04rem;margin-bottom:22px;">
+            Instant citizen SOS alerts, 20 standardized emergency categories, dedicated Public Transport Fire workflows,
+            and real-time Responder & Operations consoles with optional AWS DynamoDB + Lambda cloud sync.
+          </p>
+          <div class="flex-row" style="margin-bottom:20px;">
+            <button class="btn btn-red btn-lg" onclick="openReportModal('general')">Report Incident</button>
+            <button class="btn btn-orange btn-lg" onclick="openReportModal('transport')">🔥 Public Transport Fire</button>
+            <a href="tel:112" class="btn btn-outline btn-lg">📞 Call 112</a>
+          </div>
+          <div class="card-dark" style="padding:14px;">
+            <div style="font-size:0.74rem;font-weight:700;color:#94a3b8;text-transform:uppercase;margin-bottom:8px;">
+              1-Click Role Dashboards (Open 2 Tabs to Test Live BroadcastChannel Sync)
+            </div>
+            <div class="flex-row">
+              <button class="btn btn-navy btn-sm" onclick="demoLogin('USER')">Demo User Dashboard</button>
+              <button class="btn btn-orange btn-sm" onclick="demoLogin('RESPONDER')">Demo Responder Dashboard</button>
+              <button class="btn btn-red btn-sm" onclick="demoLogin('ADMIN')">Demo Admin Control Panel</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-dark" style="text-align:center;border:1px solid rgba(239,68,68,0.4);padding:28px;">
+          <div class="sos-ring">
+            <button class="sos-btn" onclick="openSosConfirm()">
+              <span style="font-size:1.8rem;margin-bottom:6px;">🚨</span>
+              <span style="font-weight:900;font-size:0.98rem;line-height:1.2;">ACTIVATE EMERGENCY RESPONSE</span>
+              <span style="font-size:0.7rem;margin-top:8px;opacity:0.9;">TAP FOR SOS</span>
+            </button>
+          </div>
+          <p style="color:#94a3b8;font-size:0.8rem;margin:18px 0 0;">
+            Triggers confirmation, GPS capture, repeating Web Audio siren, and live responder alert.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Safety Instructions -->
+    <section style="padding:44px 0;border-bottom:1px solid rgba(255,255,255,0.08);">
+      <div class="container">
+        <h2 style="margin:0 0 18px;font-size:1.5rem;">Emergency Safety Instructions</h2>
+        <div class="grid-4">
+          <div class="card"><strong>1. Move to Safety First</strong><p style="font-size:0.85rem;color:#475569;margin:6px 0 0;">Step away from fire, traffic, downed wires, or immediate threats before using your phone.</p></div>
+          <div class="card"><strong>2. Dial 112 in Real Crises</strong><p style="font-size:0.85rem;color:#475569;margin:6px 0 0;">This app is a prototype coordination console. Always call 112 directly for official dispatch.</p></div>
+          <div class="card"><strong>3. Share Exact Landmarks</strong><p style="font-size:0.85rem;color:#475569;margin:6px 0 0;">Enable GPS or enter highway km markers, bus route numbers, or building floors.</p></div>
+          <div class="card"><strong>4. Evacuate Transit Fires</strong><p style="font-size:0.85rem;color:#475569;margin:6px 0 0;">Leave bags behind, stay low below smoke, and move 50–100m upwind from EV battery fires.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 20 Categories -->
+    <section style="padding:44px 0;">
+      <div class="container">
+        <div class="flex-between" style="margin-bottom:18px;">
+          <div>
+            <h2 style="margin:0;font-size:1.5rem;">20 Supported Emergency Categories</h2>
+            <p style="color:#94a3b8;margin:4px 0 0;font-size:0.88rem;">Click any category to file a report immediately.</p>
+          </div>
+          <button class="btn btn-red" onclick="openReportModal('general')">+ Report Incident</button>
+        </div>
+        <div id="categoryGrid" class="grid-4"></div>
+      </div>
+    </section>
+
+    <footer style="background:#0a1224;border-top:1px solid rgba(255,255,255,0.08);padding:28px 0;">
+      <div class="container flex-between">
+        <div style="font-size:0.84rem;color:#94a3b8;max-width:540px;">
+          <strong style="color:#fff;">LIFELINE 112</strong> — Standalone Single-File HTML Prototype with AWS API Gateway + Lambda + DynamoDB sync.
+        </div>
+        <a href="tel:112" class="btn btn-red btn-sm">📞 Call 112 Emergency Helpline</a>
+      </div>
+    </footer>
+  </main>
+
+  <!-- VIEW 2: UNIFIED ROLE DASHBOARD (USER / RESPONDER / ADMIN) -->
+  <section id="dashboardView" class="hidden">
+    <div class="dash-tabs">
+      <div class="container flex-between" style="width:100%;">
+        <div class="flex-row">
+          <butto
